@@ -1,0 +1,33 @@
+# General
+.DS_Store
+.vscode/
+.idea/
+*.log
+
+# Python / Backend
+backend/__pycache__/
+backend/*.pyc
+backend/.venv/
+backend/venv/
+backend/.env
+backend/.pytest_cache/
+__pycache__/
+*.py[cod]
+
+# Node.js / Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Supabase / Local Dev
+supabase/
+
+# Scripts (Optional: ignore local dev scripts if they aren't meant for repo)
+# scripts/
