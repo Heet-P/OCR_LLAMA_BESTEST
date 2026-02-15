@@ -19,68 +19,89 @@ class OCRService:
         if not self.api_key:
              raise ValueError("NVIDIA_API_KEY is not set")
 
-        try:
-            # Encode image/PDF content to base64
-            b64_content = base64.b64encode(file_content).decode('utf-8')
+        try:    
+            full_text = ""
             
-            # Construct the media type string
-            media_type = content_type
+            if content_type == "application/pdf":
+                import fitz # PyMuPDF
+                doc = fitz.open(stream=file_content, filetype="pdf")
+                
+                print(f"DEBUG: Processing PDF with {len(doc)} pages")
+                
+                for i, page in enumerate(doc):
+                    print(f"DEBUG: Processing Page {i+1}/{len(doc)}")
+                    # 2x zoom for better OCR resolution
+                    pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
+                    png_bytes = pix.tobytes("png")
+                    b64_img = base64.b64encode(png_bytes).decode('utf-8')
+                    
+                    page_text = self._perform_ocr_request(b64_img, f"image/png")
+                    full_text += f"\n--- Page {i+1} ---\n{page_text}"
+                    
+            else:
+                # Standard Image
+                b64_content = base64.b64encode(file_content).decode('utf-8')
+                full_text = self._perform_ocr_request(b64_content, content_type)
             
-            # NVIDIA API Payload
-            headers = {
-                "Authorization": f"Bearer {self.api_key}",
-                "Accept": "application/json"
-            }
-
-            payload = {
-                "model": "meta/llama-3.2-90b-vision-instruct",
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "text",
-                                "text": "Extract all text from this document. Preserve the structure as much as possible."
-                            },
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:{media_type};base64,{b64_content}"
-                                }
-                            }
-                        ]
-                    }
-                ],
-                "max_tokens": 1024,
-                "temperature": 0.2,
-                "top_p": 0.7,
-                "stream": False
-            }
-            
-            print(f"DEBUG: Sending request to {self.invoke_url}")
-            print(f"DEBUG: Content-Type: {media_type}")
-
-            response = requests.post(self.invoke_url, headers=headers, json=payload)
-            
-            if response.status_code != 200:
-                print(f"DEBUG: API Error Status: {response.status_code}")
-                try:
-                    print(f"DEBUG: API Error Body: {response.json()}")
-                except:
-                    print(f"DEBUG: API Error Body: {response.text}")
-            
-            response.raise_for_status() # Raise error for bad status codes
-            
-            response_json = response.json()
-            content = response_json['choices'][0]['message']['content']
-            
-            # Return in a structure similar to what analyzer expects, or just the raw text
-            # We'll return a simple dict with the text, letting analyzer handle it.
-            return {"text": content}
+            return {"text": full_text}
 
         except Exception as e:
             print(f"OCR Error: {e}")
             raise e
+
+    def _perform_ocr_request(self, b64_image: str, content_type: str) -> str:
+        """
+        Helper to send a single image to NVIDIA API
+        """
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Accept": "application/json"
+        }
+
+        content_blocks = [
+            {
+                "type": "text",
+                "text": "Extract all text from this document. Preserve the structure as much as possible."
+            },
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:{content_type};base64,{b64_image}"
+                }
+            }
+        ]
+
+        payload = {
+            "model": "meta/llama-3.2-90b-vision-instruct",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": content_blocks
+                }
+            ],
+            "max_tokens": 1024,
+            "temperature": 0.2,
+            "top_p": 0.7,
+            "stream": False
+        }
+        
+        # print(f"DEBUG: Sending request to {self.invoke_url}")
+        
+        response = requests.post(self.invoke_url, headers=headers, json=payload)
+        
+        if response.status_code != 200:
+            print(f"DEBUG: API Error Status: {response.status_code}")
+            try:
+                print(f"DEBUG: API Error Body: {response.json()}")
+            except:
+                print(f"DEBUG: API Error Body: {response.text}")
+        
+        response.raise_for_status()
+        
+        response_json = response.json()
+        return response_json['choices'][0]['message']['content']
+
+
 
 # Global instance
 _ocr_service = None
@@ -110,16 +131,11 @@ async def process_form_background(form_id: str, file_content: bytes, content_typ
         ocr_data = await loop.run_in_executor(None, ocr_service.process_document, file_content, content_type)
         
         # Run Analysis
-        # from app.core.form_parser.analyzer import analyzer
-        # schema = await analyzer.analyze_form(ocr_data)
+        from app.core.form_parser.analyzer import analyzer
+        schema = await analyzer.analyze_form(ocr_data)
         
-        # SKIP ANALYSIS as requested - just return raw text wrapped in schema structure
-        schema = {
-            "title": "Extracted Text",
-            "description": "Raw text extracted from OCR", 
-            "fields": [],
-            "raw_text": ocr_data.get("text", "")
-        }
+        # Add raw text to schema for convenience
+        schema['raw_text'] = ocr_data.get("text", "")
 
         # Update database with result
         supabase.table("forms").update({

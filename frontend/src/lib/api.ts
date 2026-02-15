@@ -36,3 +36,8 @@ export const getFormStatus = async (formId: string) => {
     const response = await api.get(`/forms/${formId}`);
     return response.data;
 };
+
+export const getForms = async () => {
+    const response = await api.get('/forms/');
+    return response.data;
+};

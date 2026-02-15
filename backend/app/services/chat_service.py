@@ -114,7 +114,7 @@ class ChatService:
                 next_status = "active"
             else:
                 next_field_id = None
-                next_question = "Great! You've completed the form. Would you like to generate the PDF now?"
+                next_question = "Great! You've completed the form."
                 next_status = "completed"
                 
             # Update Session
@@ -130,7 +130,8 @@ class ChatService:
             return {
                 "message": next_question,
                 "status": next_status,
-                "completed": next_status == "completed"
+                "completed": next_status == "completed",
+                "field_label": next_field['label'] if next_field_id else None
             }
             
         except ValueError:

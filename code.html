@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+
+<html class="" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI PDF Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1132d4",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101322",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "sans": ["Inter", "sans-serif"],
+                    },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
+                    backgroundImage: {
+                        'dot-pattern': 'radial-gradient(#cbd5e1 1px, transparent 1px)',
+                    },
+                    boxShadow: {
+                        'glass': '0 4px 30px rgba(0, 0, 0, 0.1)',
+                        'inner-light': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.05)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f6f6f8;
+            color: #0f172a;
+        }
+        .bg-dot-grid {
+            background-image: radial-gradient(#94a3b8 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        /* Hide default summary marker */
+        details > summary {
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .animate-progress {
+            background-size: 200% 100%;
+            animation: progress-move 2s linear infinite;
+        }
+        @keyframes progress-move {
+            0% { background-position: 100% 0; }
+            100% { background-position: -100% 0; }
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex flex-col font-display overflow-x-hidden">
+<!-- Background Pattern -->
+<div class="fixed inset-0 z-0 bg-dot-grid opacity-[0.4] pointer-events-none"></div>
+<!-- Top Navigation -->
+<nav class="relative z-50 w-full glass-panel border-b border-slate-200/60 sticky top-0">
+<div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="size-8 bg-primary rounded-lg flex items-center justify-center text-white shadow-lg shadow-primary/30">
+<span class="material-symbols-outlined text-xl">description</span>
+</div>
+<h1 class="text-slate-900 text-lg font-bold tracking-tight">AI PDF Assistant</h1>
+<span class="mx-2 text-slate-300 text-xl font-light">/</span>
+<span class="text-slate-500 text-sm font-medium bg-slate-100 px-2 py-1 rounded">New Extraction</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="flex items-center justify-center size-9 rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+</button>
+<button class="relative flex items-center justify-center size-9 rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border-2 border-white"></span>
+</button>
+<div class="h-6 w-px bg-slate-200 mx-1"></div>
+<div class="size-9 rounded-full overflow-hidden border border-slate-200 cursor-pointer shadow-sm">
+<img alt="User Avatar" class="w-full h-full object-cover" data-alt="Portrait of a user with a blurred background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAs8EWRWCvLZiURFEqQ2JQo_gOgJ9gccpP0il1W9R2FonOAIFQ052MINL9yxi1w-0MTu6Z8HuO0f4AMP-Ugfg1VJrml7BiAYh0YZLCr-N8c3Y54m_UXEZ_SyjnlQbWMAxSi_eJvJKHm1H8AbZFwQefWWfqL1tXs79ds2u1QcPwo0p_aXcsBhbeh9m724qDYQZ0AKamfhpR1CZ-zQlX46TsKbvoSj_G9TL7E_idhMeyzLTXZXvXImljietJZewlLYLtoJ54TzpZ_ixL_"/>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="relative z-10 flex-1 flex flex-col items-center justify-start pt-12 pb-20 px-6 max-w-5xl mx-auto w-full">
+<!-- Header Text -->
+<div class="text-center mb-10 space-y-3">
+<h2 class="text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                Upload your PDF to <br/> <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400">begin extraction</span>
+</h2>
+<p class="text-slate-500 text-lg max-w-xl mx-auto font-light">
+                Drag and drop your invoices or contracts below for our AI-powered deep analysis and structured data extraction.
+            </p>
+</div>
+<!-- Layout Grid: Left (Upload/Progress) & Right (Results) -->
+<div class="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- Left Column: Upload & Processing -->
+<div class="lg:col-span-7 flex flex-col gap-6">
+<!-- Upload Zone -->
+<div class="group relative w-full aspect-[4/3] max-h-[400px] flex flex-col items-center justify-center rounded-2xl border-2 border-slate-300 border-dashed hover:border-primary/50 bg-white/40 backdrop-blur-xl shadow-inner-light transition-all duration-300 ease-out hover:shadow-lg hover:bg-white/60">
+<div class="flex flex-col items-center gap-4 p-8 text-center">
+<div class="size-16 rounded-full bg-slate-50 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-4xl text-primary">cloud_upload</span>
+</div>
+<div class="space-y-1">
+<p class="text-lg font-semibold text-slate-900">Drag &amp; drop files here</p>
+<p class="text-sm text-slate-500">Supports PDF, JPG, PNG up to 20MB</p>
+</div>
+<div class="mt-4">
+<button class="bg-primary hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg shadow-md shadow-primary/20 transition-all hover:shadow-lg hover:shadow-primary/30 active:scale-95 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">folder_open</span>
+                                Browse Files
+                            </button>
+</div>
+</div>
+</div>
+<!-- Processing Status (Active State) -->
+<div class="rounded-xl border border-slate-200 bg-white shadow-sm p-5 space-y-4">
+<div class="flex justify-between items-end">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary animate-spin">sync</span>
+<span class="text-slate-800 font-semibold text-sm">Processing Document...</span>
+</div>
+<span class="text-slate-500 font-mono text-xs">45%</span>
+</div>
+<!-- Progress Bar -->
+<div class="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary to-blue-400 w-[45%] rounded-full animate-progress shadow-[0_0_10px_rgba(17,50,212,0.4)]"></div>
+</div>
+<!-- Status Log -->
+<div class="bg-slate-50 rounded-lg p-3 border border-slate-100 font-mono text-xs space-y-2 max-h-[120px] overflow-y-auto">
+<div class="flex items-center gap-2 text-green-600">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+<span>File uploaded successfully (invoice_2023.pdf)</span>
+</div>
+<div class="flex items-center gap-2 text-green-600">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+<span>Text layer recognition complete</span>
+</div>
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+<span>Identifying table structures...</span>
+</div>
+<div class="flex items-center gap-2 text-slate-400 pl-6">
+<span>waiting for entity extraction...</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Extracted Data (Assistant) -->
+<div class="lg:col-span-5 flex flex-col gap-4">
+<div class="flex items-center justify-between mb-1">
+<h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Extraction Preview</h3>
+<div class="flex gap-2">
+<button class="text-xs font-medium text-slate-500 hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">download</span> Export
+                        </button>
+</div>
+</div>
+<!-- Card 1: Document Header -->
+<details class="group rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden" open="">
+<summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-slate-50 transition-colors select-none">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-blue-50 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-lg">article</span>
+</div>
+<div>
+<h4 class="text-sm font-semibold text-slate-900">Header Information</h4>
+<p class="text-xs text-slate-500">Invoice #, Date, Vendor</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 transition-transform group-open:rotate-180">expand_more</span>
+</summary>
+<div class="border-t border-slate-100 p-4 bg-slate-50/50">
+<div class="grid grid-cols-2 gap-y-4 gap-x-2">
+<div>
+<p class="text-[10px] uppercase text-slate-400 font-bold tracking-wide">Invoice Number</p>
+<p class="text-sm font-medium text-slate-800">INV-2023-001</p>
+</div>
+<div>
+<p class="text-[10px] uppercase text-slate-400 font-bold tracking-wide">Date</p>
+<p class="text-sm font-medium text-slate-800">Oct 24, 2023</p>
+</div>
+<div class="col-span-2">
+<p class="text-[10px] uppercase text-slate-400 font-bold tracking-wide">Vendor Name</p>
+<div class="flex items-center gap-2 mt-1">
+<div class="size-5 rounded bg-gray-200 overflow-hidden shrink-0">
+<img alt="Vendor Logo" data-alt="Small placeholder logo for a company" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBK9J1ilz_x2lY0I8wtAn1_VNfp1VH0UfSEEUJtyL3LF145HUUtYYVEy-4wEV9kyV62zJVzE9UGylVeqK1IwkWvOnejIn63v220NZMrneUDXOSDqEI0eaifsCJCIx3bfg49JzcV2-AmEMX0-VpIkxiRRtGTII40S2ecTSRxMAFTSPMPb0kmfuJe6RCCMzz8XMypae-4WZyG6iJ5_5-pX-TcTl9tFuilObElhdHL8NQ0RX0Oa7UyRZYk9ShP5YJDRHtU3ru94J_4F2Bu"/>
+</div>
+<p class="text-sm font-medium text-slate-800">Acme Corporation Ltd.</p>
+</div>
+</div>
+</div>
+</div>
+</details>
+<!-- Card 2: Line Items -->
+<details class="group rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+<summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-slate-50 transition-colors select-none">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-lg">table_chart</span>
+</div>
+<div>
+<h4 class="text-sm font-semibold text-slate-900">Line Items</h4>
+<p class="text-xs text-slate-500">5 items extracted</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 transition-transform group-open:rotate-180">expand_more</span>
+</summary>
+<div class="border-t border-slate-100 p-0">
+<table class="w-full text-left text-sm">
+<thead class="bg-slate-50 text-slate-500 text-xs font-semibold">
+<tr>
+<th class="px-4 py-2 font-medium">Description</th>
+<th class="px-4 py-2 font-medium text-right">Qty</th>
+<th class="px-4 py-2 font-medium text-right">Total</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 text-slate-700">
+<tr>
+<td class="px-4 py-2">Premium Plan</td>
+<td class="px-4 py-2 text-right">1</td>
+<td class="px-4 py-2 text-right">$49.00</td>
+</tr>
+<tr>
+<td class="px-4 py-2">API Credits</td>
+<td class="px-4 py-2 text-right">500</td>
+<td class="px-4 py-2 text-right">$15.00</td>
+</tr>
+</tbody>
+</table>
+<div class="p-2 text-center border-t border-slate-100">
+<button class="text-xs text-primary font-medium hover:underline">View all 5 items</button>
+</div>
+</div>
+</details>
+<!-- Card 3: Summary & Totals -->
+<details class="group rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden" open="">
+<summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-slate-50 transition-colors select-none">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-green-50 text-green-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-lg">calculate</span>
+</div>
+<div>
+<h4 class="text-sm font-semibold text-slate-900">Summary &amp; Totals</h4>
+<p class="text-xs text-slate-500">Tax, Subtotal, Grand Total</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 transition-transform group-open:rotate-180">expand_more</span>
+</summary>
+<div class="border-t border-slate-100 p-4 bg-slate-50/50">
+<div class="space-y-2">
+<div class="flex justify-between items-center text-sm">
+<span class="text-slate-500">Subtotal</span>
+<span class="font-medium text-slate-800">$64.00</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="text-slate-500">Tax (10%)</span>
+<span class="font-medium text-slate-800">$6.40</span>
+</div>
+<div class="h-px bg-slate-200 my-2"></div>
+<div class="flex justify-between items-center">
+<span class="text-slate-900 font-bold">Total Due</span>
+<span class="text-xl font-bold text-slate-900">$70.40</span>
+</div>
+</div>
+</div>
+</details>
+<div class="mt-4 p-4 rounded-xl bg-blue-50/50 border border-blue-100 flex items-start gap-3">
+<span class="material-symbols-outlined text-primary mt-0.5">auto_awesome</span>
+<div>
+<p class="text-sm font-medium text-primary">AI Insight</p>
+<p class="text-xs text-slate-600 mt-1 leading-relaxed">The vendor address on this invoice does not match your saved records. Would you like to update it?</p>
+<div class="flex gap-3 mt-2">
+<button class="text-xs font-semibold text-primary hover:underline">Update Record</button>
+<button class="text-xs font-semibold text-slate-400 hover:text-slate-600">Dismiss</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Toolbar (Bottom) -->
+<div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
+<div class="glass-panel px-4 py-2 rounded-full shadow-xl shadow-slate-200/50 flex items-center gap-2 border border-white">
+<button class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-colors">
+<span class="material-symbols-outlined text-[18px]">restart_alt</span>
+                Reset
+            </button>
+<div class="w-px h-4 bg-slate-300"></div>
+<button class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-colors">
+<span class="material-symbols-outlined text-[18px]">history</span>
+                History
+            </button>
+<div class="w-px h-4 bg-slate-300"></div>
+<button class="flex items-center gap-2 px-4 py-2 text-sm font-bold text-white bg-slate-900 hover:bg-black rounded-full transition-colors shadow-lg shadow-slate-900/20 ml-1">
+<span class="material-symbols-outlined text-[18px]">save_alt</span>
+                Export CSV
+            </button>
+</div>
+</div>
+</body></html>
