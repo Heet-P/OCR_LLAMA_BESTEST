@@ -4,6 +4,13 @@
 .idea/
 *.log
 
+# Environment variables (should never be committed)
+.env
+.env.local
+.env.*.local
+.env.*
+!.env.example
+
 # Python / Backend
 backend/__pycache__/
 backend/*.pyc
